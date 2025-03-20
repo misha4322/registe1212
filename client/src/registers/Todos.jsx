@@ -9,8 +9,8 @@ export default function Todos() {
   const [updateTask] = useUpdateTaskMutation();
   const [deleteTask] = useDeleteTaskMutation();
   const [newTodo, setNewTodo] = useState('');
-  const [editingTaskId, setEditingTaskId] = useState(null); 
-  const [editedTitle, setEditedTitle] = useState(''); 
+  const [editingTaskId, setEditingTaskId] = useState(null);
+  const [editedTitle, setEditedTitle] = useState('');
   const navigate = useNavigate();
 
   const addTodo = async () => {
@@ -29,7 +29,7 @@ export default function Todos() {
     try {
       await createTask({ title: newTodo }).unwrap();
       setNewTodo('');
-      refetch(); 
+      refetch();
     } catch (err) {
       if (err.status === 403) {
         alert('Токен истёк. Пожалуйста, войдите заново.');
@@ -44,7 +44,7 @@ export default function Todos() {
   const toggleTodo = async (id, completed) => {
     try {
       await updateTask({ id, completed: !completed }).unwrap();
-      refetch(); 
+      refetch();
     } catch (err) {
       alert('Ошибка при обновлении задачи: ' + (err.data?.error || 'Неизвестная ошибка'));
     }
@@ -53,7 +53,7 @@ export default function Todos() {
   const removeTodo = async (id) => {
     try {
       await deleteTask(id).unwrap();
-      refetch(); 
+      refetch();
     } catch (err) {
       alert('Ошибка при удалении задачи: ' + (err.data?.error || 'Неизвестная ошибка'));
     }
@@ -72,8 +72,8 @@ export default function Todos() {
 
     try {
       await updateTask({ id, title: editedTitle }).unwrap();
-      setEditingTaskId(null); 
-      refetch(); 
+      setEditingTaskId(null);
+      refetch();
     } catch (err) {
       alert('Ошибка при обновлении задачи: ' + (err.data?.error || 'Неизвестная ошибка'));
     }
@@ -108,7 +108,7 @@ export default function Todos() {
       </div>
 
       <ul className={styles.todoList}>
-        {tasks?.map((task, index) => (
+        {tasks?.map((task) => (
           <li key={task.id} className={styles.todoItem}>
             <input
               type="checkbox"

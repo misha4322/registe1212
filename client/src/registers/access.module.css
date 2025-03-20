@@ -55,14 +55,14 @@ body {
   background-color: #555;
 }
 
-/* Заголовки */
+
 .header {
   margin-bottom: 20px;
   text-align: center;
   font-size: 24px;
 }
 
-/* Список задач */
+
 .todoForm {
   display: flex;
   gap: 10px;
@@ -144,4 +144,80 @@ body {
 
 .saveButton:hover {
   background-color: #218838;
+}
+
+
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  cursor: pointer;
+  margin: 5px;
+}
+
+.button:hover {
+  background-color: #0056b3;
+}
+
+.todoForm {
+  display: flex;
+  margin-bottom: 20px;
+}
+
+.input {
+  flex: 1;
+  padding: 10px;
+  margin-right: 10px;
+}
+
+.todoList {
+  list-style: none;
+  padding: 0;
+}
+
+.todoItem {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.checkbox {
+  margin-right: 10px;
+}
+
+.taskTitle {
+  flex: 1;
+  cursor: pointer;
+}
+
+.editInput {
+  flex: 1;
+  padding: 5px;
+  margin-right: 10px;
+}
+
+.saveButton {
+  background-color: #28a745;
+}
+
+.deleteButton {
+  background-color: #dc3545;
+}
+
+.loading {
+  text-align: center;
+  font-size: 1.2em;
+  margin-top: 20px;
 }

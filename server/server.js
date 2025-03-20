@@ -163,19 +163,22 @@ app.post('/tasks', authenticateToken, async (req, res) => {
 
 
 app.put('/tasks/:id', authenticateToken, async (req, res) => {
-  const { title, completed } = req.body;
+  const { title } = req.body;
   const taskId = req.params.id;
 
-  if (title === undefined && completed === undefined) {
-    return res.status(400).json({ error: 'Необходимо указать title или completed' });
+
+  if (!title) {
+    return res.status(400).json({ error: 'Название задачи обязательно' });
   }
 
   try {
+  
     const result = await pool.query(
-      'UPDATE tasks SET title = COALESCE($1, title), completed = COALESCE($2, completed) WHERE id = $3 AND user_id = $4 RETURNING *',
-      [title, completed, taskId, req.user.userId]
+      'UPDATE tasks SET title = $1 WHERE id = $2 AND user_id = $3 RETURNING *',
+      [title, taskId, req.user.userId]
     );
 
+    
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Задача не найдена' });
     }
