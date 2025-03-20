@@ -1,0 +1,18 @@
+
+.nav {
+    background-color: #000;
+    padding: 10px;
+    text-align: center;
+    border-bottom: 1px solid #fff;
+  }
+  
+  .link {
+    color: #fff;
+    margin: 0 10px;
+    text-decoration: none;
+    font-weight: bold;
+  }
+  
+  .link:hover {
+    text-decoration: underline;
+  }
