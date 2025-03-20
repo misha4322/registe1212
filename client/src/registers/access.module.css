@@ -117,3 +117,31 @@ body {
   background-color: rgba(0, 0, 0, 0.7);
   z-index: 999;
 }
+
+
+
+.checkbox {
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.editInput {
+  flex: 1;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-right: 10px;
+}
+
+.saveButton {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.saveButton:hover {
+  background-color: #218838;
+}

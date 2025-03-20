@@ -9,10 +9,11 @@ export default function Todos() {
   const [updateTask] = useUpdateTaskMutation();
   const [deleteTask] = useDeleteTaskMutation();
   const [newTodo, setNewTodo] = useState('');
+  const [editingTaskId, setEditingTaskId] = useState(null); 
+  const [editedTitle, setEditedTitle] = useState(''); 
   const navigate = useNavigate();
 
   const addTodo = async () => {
-    
     if (!newTodo.trim()) {
       alert('Название задачи обязательно');
       return;
@@ -26,9 +27,8 @@ export default function Todos() {
     }
 
     try {
-      
-      await createTask({ title: newTodo, description: '' }).unwrap();
-      setNewTodo(''); 
+      await createTask({ title: newTodo }).unwrap();
+      setNewTodo('');
       refetch(); 
     } catch (err) {
       if (err.status === 403) {
@@ -41,9 +41,9 @@ export default function Todos() {
     }
   };
 
-  const toggleTodo = async (id) => {
+  const toggleTodo = async (id, completed) => {
     try {
-      await updateTask({ id, completed: true }).unwrap();
+      await updateTask({ id, completed: !completed }).unwrap();
       refetch(); 
     } catch (err) {
       alert('Ошибка при обновлении задачи: ' + (err.data?.error || 'Неизвестная ошибка'));
@@ -59,6 +59,26 @@ export default function Todos() {
     }
   };
 
+  const startEditing = (task) => {
+    setEditingTaskId(task.id);
+    setEditedTitle(task.title);
+  };
+
+  const saveEditedTodo = async (id) => {
+    if (!editedTitle.trim()) {
+      alert('Название задачи не может быть пустым');
+      return;
+    }
+
+    try {
+      await updateTask({ id, title: editedTitle }).unwrap();
+      setEditingTaskId(null); 
+      refetch(); 
+    } catch (err) {
+      alert('Ошибка при обновлении задачи: ' + (err.data?.error || 'Неизвестная ошибка'));
+    }
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('token');
     navigate('/login');
@@ -70,7 +90,7 @@ export default function Todos() {
     <div className={styles.container}>
       <h2 className={styles.header}>Список задач</h2>
       <button onClick={handleLogout} className={styles.button}>
-        Выйти с акаунта
+        Выйти
       </button>
 
       <div className={styles.todoForm}>
@@ -90,20 +110,41 @@ export default function Todos() {
       <ul className={styles.todoList}>
         {tasks?.map((task, index) => (
           <li key={task.id} className={styles.todoItem}>
-            <span className={styles.taskNumber}>{index + 1}.</span>
-            <span
-              className={styles.taskTitle}
-              style={{
-                textDecoration: task.completed ? 'line-through' : 'none',
-                cursor: 'pointer',
-              }}
-              onClick={() => toggleTodo(task.id)}
-            >
-              {task.title}
-            </span>
-            <button onClick={() => removeTodo(task.id)} className={styles.deleteButton}>
-              Удалить
-            </button>
+            <input
+              type="checkbox"
+              checked={task.completed}
+              onChange={() => toggleTodo(task.id, task.completed)}
+              className={styles.checkbox}
+            />
+            {editingTaskId === task.id ? (
+              <>
+                <input
+                  type="text"
+                  value={editedTitle}
+                  onChange={(e) => setEditedTitle(e.target.value)}
+                  className={styles.editInput}
+                />
+                <button onClick={() => saveEditedTodo(task.id)} className={styles.saveButton}>
+                  Сохранить
+                </button>
+              </>
+            ) : (
+              <>
+                <span
+                  className={styles.taskTitle}
+                  style={{
+                    textDecoration: task.completed ? 'line-through' : 'none',
+                    cursor: 'pointer',
+                  }}
+                  onClick={() => startEditing(task)}
+                >
+                  {task.title}
+                </span>
+                <button onClick={() => removeTodo(task.id)} className={styles.deleteButton}>
+                  Удалить
+                </button>
+              </>
+            )}
           </li>
         ))}
       </ul>

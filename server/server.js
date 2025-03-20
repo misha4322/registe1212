@@ -25,6 +25,7 @@ const pool = new Pool({
 app.use(cors());
 app.use(express.json());
 
+
 const validateUserData = (username, password) => {
   if (!username || !password) {
     return { error: 'Имя пользователя и пароль обязательны' };
@@ -34,7 +35,6 @@ const validateUserData = (username, password) => {
   }
   return null;
 };
-
 
 app.post('/register', async (req, res) => {
   const { username, password } = req.body;
@@ -46,13 +46,13 @@ app.post('/register', async (req, res) => {
   }
 
   try {
-    
+
     const userExists = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
     if (userExists.rows.length > 0) {
       return res.status(400).json({ error: 'Имя пользователя уже занято' });
     }
 
-    
+ 
     const hashedPassword = await bcrypt.hash(password, 10);
 
    
@@ -61,10 +61,10 @@ app.post('/register', async (req, res) => {
       [username, hashedPassword]
     );
 
-   
+
     const token = jwt.sign({ userId: result.rows[0].id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-    
+
     res.status(201).json({ token });
   } catch (err) {
     console.error('Ошибка при регистрации:', err);
@@ -76,32 +76,31 @@ app.post('/register', async (req, res) => {
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
 
-
+ 
   const validationError = validateUserData(username, password);
   if (validationError) {
     return res.status(400).json(validationError);
   }
 
   try {
- 
+
     const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
     const user = result.rows[0];
 
-   
+    
     if (!user) {
       return res.status(400).json({ error: 'Пользователь не найден' });
     }
 
-  
+ 
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
       return res.status(400).json({ error: 'Неверный пароль' });
     }
 
-  
+ 
     const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-   
     res.json({ token });
   } catch (err) {
     console.error('Ошибка при входе:', err);
@@ -118,7 +117,7 @@ function authenticateToken(req, res, next) {
     return res.status(401).json({ error: 'Токен отсутствует' });
   }
 
-  
+
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
     if (err) {
       return res.status(403).json({ error: 'Недействительный токен' });
@@ -131,7 +130,7 @@ function authenticateToken(req, res, next) {
 
 app.get('/tasks', authenticateToken, async (req, res) => {
   try {
-   
+  
     const result = await pool.query('SELECT * FROM tasks WHERE user_id = $1', [req.user.userId]);
     res.json(result.rows);
   } catch (err) {
@@ -150,7 +149,7 @@ app.post('/tasks', authenticateToken, async (req, res) => {
   }
 
   try {
- 
+   
     const result = await pool.query(
       'INSERT INTO tasks (title, user_id) VALUES ($1, $2) RETURNING *',
       [title, req.user.userId]
@@ -164,21 +163,18 @@ app.post('/tasks', authenticateToken, async (req, res) => {
 
 
 app.put('/tasks/:id', authenticateToken, async (req, res) => {
-  const { title } = req.body;
+  const { title, completed } = req.body;
   const taskId = req.params.id;
 
-  
-  if (!title) {
-    return res.status(400).json({ error: 'Название задачи обязательно' });
+  if (title === undefined && completed === undefined) {
+    return res.status(400).json({ error: 'Необходимо указать title или completed' });
   }
 
   try {
-   
     const result = await pool.query(
-      'UPDATE tasks SET title = $1 WHERE id = $2 AND user_id = $3 RETURNING *',
-      [title, taskId, req.user.userId]
+      'UPDATE tasks SET title = COALESCE($1, title), completed = COALESCE($2, completed) WHERE id = $3 AND user_id = $4 RETURNING *',
+      [title, completed, taskId, req.user.userId]
     );
-
 
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Задача не найдена' });
@@ -194,12 +190,13 @@ app.delete('/tasks/:id', authenticateToken, async (req, res) => {
   const taskId = req.params.id;
 
   try {
+  
     const result = await pool.query(
       'DELETE FROM tasks WHERE id = $1 AND user_id = $2 RETURNING *',
       [taskId, req.user.userId]
     );
 
-
+  
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Задача не найдена' });
     }
